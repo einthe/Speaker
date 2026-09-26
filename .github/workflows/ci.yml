@@ -1,0 +1,51 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e:local
+      - run: npx playwright test --config playwright.webkit.config.ts
+      - run: npm run test:e2e:demo
+      - run: npm run test:e2e
+  supabase-integration:
+    runs-on: ubuntu-latest
+    env:
+      E2E_REQUIRE_BACKEND: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: npm ci
+      - run: supabase start
+      - run: supabase db reset
+      - name: Configure isolated local test services
+        run: |
+          supabase status -o json > /tmp/supabase-status.json
+          node scripts/configure-ci.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-traces
+          path: test-results/
+      - if: always()
+        run: supabase stop --no-backup

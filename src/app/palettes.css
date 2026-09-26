@@ -1,0 +1,232 @@
+/* NTNUI variants share club accents while keeping their surfaces distinct. */
+:root[data-palette|="club"] {
+  --club-green: #006f3b;
+  --club-yellow: #f3eb00;
+  --club-red: #e10c0c;
+  --text: #f5f5ef;
+  --muted: #b9bcb5;
+}
+:root[data-palette="club"] {
+  --bg: #151512;
+  --panel: #23231f;
+  --panel-raised: #30312a;
+  --sidebar: #11120f;
+  --border: #45483b;
+  --accent: #f3eb00;
+  --accent-dark: #24321c;
+}
+:root[data-palette="club-black"] {
+  --bg: #080a09;
+  --panel: #111613;
+  --panel-raised: #1c241e;
+  --sidebar: #060807;
+  --border: #344e3b;
+  --accent: #f3eb00;
+  --accent-dark: #14291c;
+}
+:root[data-palette="club-green"] {
+  --bg: #091d14;
+  --panel: #122d20;
+  --panel-raised: #1d3c2c;
+  --sidebar: #07160f;
+  --border: #3b6048;
+  --accent: #f3eb00;
+  --accent-dark: #24462a;
+  --muted: #b4c8b9;
+}
+:root[data-palette="club-forest"] {
+  --bg: #12251a;
+  --panel: #1c3325;
+  --panel-raised: #294431;
+  --sidebar: #0c1a11;
+  --border: #4b6953;
+  --accent: #8be094;
+  --accent-dark: #29462b;
+  --muted: #bdccba;
+}
+:root[data-palette="club-charcoal"] {
+  --bg: #202224;
+  --panel: #2b2e30;
+  --panel-raised: #393d3f;
+  --sidebar: #181a1b;
+  --border: #555c5a;
+  --accent: #f3eb00;
+  --accent-dark: #303d30;
+  --muted: #c0c5c1;
+}
+:root[data-palette="club-slate"] {
+  --bg: #2c3231;
+  --panel: #363e3b;
+  --panel-raised: #434e48;
+  --sidebar: #222826;
+  --border: #63716a;
+  --accent: #9be4ac;
+  --accent-dark: #354b3c;
+  --muted: #ccd3cc;
+}
+:root[data-palette="petrol"] {
+  --bg: #0c191e;
+  --panel: #14262d;
+  --panel-raised: #1c333c;
+  --sidebar: #101f25;
+  --border: #34505a;
+  --text: #e8f3f3;
+  --muted: #a4bcc2;
+  --accent: #8ad9d4;
+  --accent-dark: #183c42;
+}
+:root[data-palette="midnight"] {
+  --bg: #111624;
+  --panel: #1b2334;
+  --panel-raised: #263047;
+  --sidebar: #161c2b;
+  --border: #3c4963;
+  --text: #eef1fa;
+  --muted: #b0bad0;
+  --accent: #aac6ff;
+  --accent-dark: #263653;
+}
+:root[data-palette="plum"] {
+  --bg: #1c1420;
+  --panel: #2a1f30;
+  --panel-raised: #392b40;
+  --sidebar: #221927;
+  --border: #57415f;
+  --text: #f5edf6;
+  --muted: #c5afc9;
+  --accent: #ddafe4;
+  --accent-dark: #442d4b;
+}
+:root[data-palette="amber"] {
+  --bg: #21180f;
+  --panel: #302418;
+  --panel-raised: #423221;
+  --sidebar: #281d13;
+  --border: #695039;
+  --text: #faf1e3;
+  --muted: #cdbba2;
+  --accent: #f4c36c;
+  --accent-dark: #4b3418;
+}
+:root[data-palette="burgundy"] {
+  --bg: #201115;
+  --panel: #321c23;
+  --panel-raised: #452630;
+  --sidebar: #29161d;
+  --border: #70404e;
+  --text: #fbecf0;
+  --muted: #d1afb9;
+  --accent: #f4a0ad;
+  --accent-dark: #54232f;
+}
+:root[data-palette="graphite"] {
+  --bg: #151617;
+  --panel: #222426;
+  --panel-raised: #303337;
+  --sidebar: #1b1d1f;
+  --border: #50555c;
+  --text: #f2f3f5;
+  --muted: #b6bdc7;
+  --accent: #d7dce2;
+  --accent-dark: #363d47;
+}
+:root:is(
+  [data-palette|="club"],
+  [data-palette="petrol"],
+  [data-palette="midnight"],
+  [data-palette="plum"],
+  [data-palette="amber"],
+  [data-palette="burgundy"],
+  [data-palette="graphite"]
+) {
+  --theme-ink: var(--bg);
+  --theme-hover: color-mix(in srgb, var(--accent), white 18%);
+  --theme-surface: var(--panel);
+  --theme-raised: var(--panel-raised);
+  --theme-border: var(--border);
+  --theme-text: var(--text);
+  --theme-muted: var(--muted);
+  --theme-dark: var(--accent-dark);
+  --theme-accent: var(--accent);
+  --theme-faint: color-mix(in srgb, var(--accent) 6%, transparent);
+  --theme-soft-border: color-mix(in srgb, var(--accent) 16%, transparent);
+  --theme-art: color-mix(in srgb, var(--accent) 40%, transparent);
+  --theme-art-solid: color-mix(in srgb, var(--accent) 50%, var(--bg));
+  --theme-court: color-mix(in srgb, var(--panel-raised), var(--accent-dark) 50%);
+  --theme-court-end: var(--panel);
+  --theme-glow: color-mix(in srgb, var(--accent-dark) 70%, transparent);
+  --theme-story: color-mix(in srgb, var(--bg), var(--accent-dark) 40%);
+}
+:root[data-palette|="club"] {
+  --theme-faint: color-mix(in srgb, var(--club-green) 16%, transparent);
+  --theme-soft-border: color-mix(in srgb, var(--club-green) 45%, var(--border));
+  --theme-art: color-mix(in srgb, var(--club-green) 55%, var(--border));
+  --theme-art-solid: var(--club-green);
+  --theme-court: color-mix(in srgb, var(--panel), var(--club-green) 12%);
+  --theme-glow: color-mix(in srgb, var(--border) 10%, transparent);
+  --theme-story: var(--panel);
+}
+:root[data-palette|="club"] .nav-link.active {
+  box-shadow: inset 3px 0 var(--club-green);
+}
+:root[data-palette|="club"] .nav-dot {
+  background: var(--club-red);
+}
+:root[data-palette|="club"] .brand-logo {
+  filter: none;
+}
+:root[data-palette="club"] .app-shell:not([data-high-contrast="on"]) .main-content {
+  background-image: linear-gradient(
+    116deg,
+    transparent 0% 68%,
+    color-mix(in srgb, var(--club-green) 15%, transparent) 68% 78%,
+    transparent 78% 82%,
+    color-mix(in srgb, var(--club-red) 12%, transparent) 82% 84%,
+    transparent 84% 100%
+  );
+  background-size: 100% 320px;
+  background-repeat: no-repeat;
+}
+:root[data-palette|="club"] .brand strong {
+  color: var(--club-yellow);
+}
+:root:is([data-palette="club-charcoal"], [data-palette="club-slate"])
+  .app-shell[data-card-colors="classic"]
+  :is(.role-post, .coach-post, .event-highlight)
+  :is(.badge, .event-type-text) {
+  color: color-mix(in srgb, var(--tone-color, var(--text)), white 55%);
+}
+.palette-selector {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+}
+.palette-selector label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.palette-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.palette-choice select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  font-size: 12px;
+  padding: 8px;
+}
+.palette-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.auth-panel > .palette-selector {
+  margin-top: auto;
+  align-self: flex-end;
+  min-width: 175px;
+  padding: 0;
+}

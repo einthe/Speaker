@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>NTNUI Volleyball D2A</title>
+  <rect width="64" height="64" rx="12" fill="#000000"/>
+  <g fill="#ffffff" fill-rule="evenodd">
+    <path d="M4 18h7c7 0 11 5 11 14s-4 14-11 14H4Zm6 6v16h1c3.5 0 5-2.5 5-8s-1.5-8-5-8Z"/>
+    <path d="M25 26c0-5.5 3-8.5 8-8.5s8.5 3 8.5 8c0 4-2 7-5.5 10l-5 4.5h10.5v6H25v-6l7.5-8c2.5-2.5 3-4 3-6 0-1.5-.8-2.5-2.5-2.5s-2.5 1-2.5 2.5v1H25Z"/>
+    <path d="M49 18h6l7 28h-6l-1.3-6h-5.4L48 46h-6Zm1.5 16h3L52 26Z"/>
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+# Local demo and test tooling is never uploaded as application code.
+scripts/demo.mjs
+scripts/demo-seed.mjs
+tests/
+playwright*.ts
+playwright-report/
+test-results/
+.next-*/

@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.next-*/
+out/
+.env*
+!.env.example
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.DS_Store
+supabase/.temp/
+codex-conversation.md
