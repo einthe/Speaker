@@ -2,11 +2,13 @@ import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 async function openPanel(page: Page, name: "Lag" | "Kamper") {
+  await expect(page.locator(".workspace-header")).toBeVisible();
   const toggle = page.getByRole("button", { name, exact: true });
   if ((await toggle.isVisible()) && (await toggle.getAttribute("aria-expanded")) === "false")
     await toggle.click();
 }
 async function closePanel(page: Page, name: "Lag" | "Kamper") {
+  await expect(page.locator(".workspace-header")).toBeVisible();
   const toggle = page.getByRole("button", { name, exact: true });
   if ((await toggle.isVisible()) && (await toggle.getAttribute("aria-expanded")) === "true")
     await toggle.click();
@@ -66,7 +68,33 @@ test("reads the whole script and changes both lineups locally", async ({ page },
   await expect(page.locator("#introductions")).toContainText("Robin Dahl");
 });
 
-test("adds a manual match and edits its players without saving", async ({ page }) => {
+test("loads real upcoming matches and allows editing imported players", async ({
+  page,
+}, testInfo) => {
+  test.skip(process.env.SPEAKER_LIVE_CHECK !== "1", "Optional live source check");
+  await page.goto("http://127.0.0.1:3102/matches");
+  await openPanel(page, "Kamper");
+  await expect(page.getByRole("link", { name: "VolleyLive" })).toBeVisible();
+  await expect(page.locator(".source-warning")).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toContainText("NTNUI –");
+  await openPanel(page, "Lag");
+  const home = page.getByRole("region", { name: "Spillere NTNUI", exact: true });
+  const name = home.getByRole("textbox", { name: /^Navn spiller/ }).first();
+  await expect(name).not.toHaveValue("");
+  await name.fill("Importert Testspiller");
+  await home.getByRole("button", { name: "Kaptein Importert Testspiller", exact: true }).click();
+  await expect(page.locator("#introductions")).toContainText("Importert Testspiller");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
+  await page.screenshot({ path: testInfo.outputPath("live-workspace.png"), fullPage: true });
+});
+
+test("adds matches and players when randomUUID is unavailable on HTTP", async ({ page }) => {
+  // Localhost is treated as secure by browsers, so reproduce the missing HTTP API.
+  await page.addInitScript(() => {
+    Object.defineProperty(window.crypto, "randomUUID", { value: undefined });
+  });
   await page.goto("/matches");
   await openPanel(page, "Kamper");
   await page.getByRole("button", { name: "Ny kamp", exact: true }).click();

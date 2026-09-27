@@ -13,6 +13,7 @@ export type Team = {
   captainId: string;
   liberoId: string;
   coach: string;
+  rosterSource?: "match" | "team";
 };
 
 export type Match = {
@@ -25,6 +26,8 @@ export type Match = {
   secondReferee: string;
   awardPlayerId: string;
   notes: string;
+  sourceUrl?: string;
+  importWarning?: string;
 };
 
 export function announcementTeams(match: Match): Team[] {

@@ -12,6 +12,7 @@ import {
   type Team,
 } from "@/lib/speaker/model";
 import { buildSpeakerScript } from "@/lib/speaker/script";
+import { createLocalId } from "@/lib/speaker/id";
 
 function TeamEditor({ team, onChange }: { team: Team; onChange: (team: Team) => void }) {
   const count = team.players.filter((p) => p.starter).length;
@@ -23,6 +24,14 @@ function TeamEditor({ team, onChange }: { team: Team; onChange: (team: Team) => 
           {count}/6
         </span>
       </div>
+      {team.rosterSource === "team" && (
+        <p
+          className="roster-source"
+          title="Kamptroppen er ikke publisert. Listen viser lagets registrerte spillere."
+        >
+          Lagstall
+        </p>
+      )}
       <div className="roster-head" aria-hidden="true">
         <span>Nr.</span>
         <span>Spiller</span>
@@ -114,7 +123,7 @@ function TeamEditor({ team, onChange }: { team: Team; onChange: (team: Team) => 
             ...team,
             players: [
               ...team.players,
-              { id: crypto.randomUUID(), number: "", name: "", starter: false },
+              { id: createLocalId(), number: "", name: "", starter: false },
             ],
           })
         }
@@ -134,7 +143,17 @@ function TeamEditor({ team, onChange }: { team: Team; onChange: (team: Team) => 
   );
 }
 
-export function Workspace({ initialMatches, demo }: { initialMatches: Match[]; demo: boolean }) {
+export function Workspace({
+  initialMatches,
+  demo,
+  live = false,
+  sourceWarning,
+}: {
+  initialMatches: Match[];
+  demo: boolean;
+  live?: boolean;
+  sourceWarning?: string;
+}) {
   const [matches, setMatches] = useState(initialMatches);
   const [selectedId, setSelectedId] = useState(initialMatches[0]?.id ?? "");
   const [fontSize, setFontSize] = useState(22);
@@ -173,7 +192,7 @@ export function Workspace({ initialMatches, demo }: { initialMatches: Match[]; d
   }
 
   function addMatch() {
-    const next = createMatch(crypto.randomUUID(), new Date().toISOString());
+    const next = createMatch(createLocalId(), new Date().toISOString());
     setMatches((current) => [...current, next]);
     setSelectedId(next.id);
     setDetailsOpen(true);
@@ -243,6 +262,21 @@ export function Workspace({ initialMatches, demo }: { initialMatches: Match[]; d
             </button>
           </div>
           {demo && <span className="demo-label">Demokamper</span>}
+          {live && (
+            <a
+              className="source-link"
+              href={match?.sourceUrl || "https://kamper.volleyball.no/scoreboard"}
+              target="_blank"
+              rel="noreferrer"
+            >
+              VolleyLive ↗
+            </a>
+          )}
+          {sourceWarning && (
+            <p className="source-warning" role="status">
+              {sourceWarning}
+            </p>
+          )}
           <nav className="fixture-list" aria-label="Velg kamp">
             {[...matches]
               .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))
@@ -299,6 +333,11 @@ export function Workspace({ initialMatches, demo }: { initialMatches: Match[]; d
                   </button>
                 </div>
               </div>
+              {match.importWarning && (
+                <p className="source-warning" role="status">
+                  {match.importWarning}
+                </p>
+              )}
               <article
                 className="script"
                 style={{ "--script-size": `${fontSize}px` } as CSSProperties}
@@ -329,7 +368,7 @@ export function Workspace({ initialMatches, demo }: { initialMatches: Match[]; d
             </>
           ) : (
             <div className="empty-workspace">
-              <h1>Manus</h1>
+              <h1>{live && !sourceWarning ? "Ingen kommende kamper" : "Manus"}</h1>
               <button onClick={addMatch}>
                 <Plus size={16} /> Ny kamp
               </button>

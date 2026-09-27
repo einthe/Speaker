@@ -582,3 +582,31 @@ summary {
     color: black;
   }
 }
+.loading-workspace {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  color: var(--muted);
+}
+.source-link,
+.roster-source {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0 0 14px;
+}
+.source-link {
+  padding-left: 8px;
+  text-decoration: none;
+}
+.source-link:hover {
+  color: var(--accent);
+}
+.roster-source {
+  margin-top: -7px;
+}
+.source-warning {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #edc08c;
+  margin-bottom: 20px;
+}

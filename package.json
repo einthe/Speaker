@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/demo.mjs",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -14,7 +14,8 @@
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "format": "prettier --write src tests scripts *.ts *.mjs *.json README.md .github/workflows/ci.yml",
     "format:check": "prettier --check src tests scripts *.ts *.mjs *.json README.md .github/workflows/ci.yml",
-    "dev:manual": "next dev"
+    "dev:manual": "SPEAKER_MATCH_SOURCE=manual next dev",
+    "dev:demo": "node scripts/demo.mjs"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "5.3.0",

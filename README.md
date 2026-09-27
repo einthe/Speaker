@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. The demo includes three labelled fictional matches, with no backend or account setup.
+Open http://localhost:3000. Upcoming NTNUI home matches in Dragvollhallen load automatically from VolleyLive, including available player lists, coaches and referees. No account or API key is needed.
 
 For an empty workspace where you add matches manually:
 
@@ -23,7 +23,7 @@ For an empty workspace where you add matches manually:
 npm run dev:manual
 ```
 
-No environment file is needed. Optionally set `SPEAKER_DEMO=1` to show fictional fixtures when using `dev:manual` or a production build.
+For three labelled fictional matches, run `npm run dev:demo`. No environment file is needed. `SPEAKER_MATCH_SOURCE=manual` disables live fetching; `SPEAKER_DEMO=1` selects fictional fixtures instead.
 
 ## Build
 
@@ -34,7 +34,11 @@ npm start
 
 ## External data
 
-No live match source is connected yet. Removing Supabase does not fetch live fixtures or rosters automatically. A future integration can fetch data from an external API on the Next.js server and pass it to the existing workspace; a database is not required for that. Availability of fixtures, rosters, captains and lineups depends on what the source provides. Manual editing remains available for missing information.
+The server uses the public data service behind [VolleyLive](https://kamper.volleyball.no/scoreboard?seasonId=201070&tournamentId=449547). It discovers the current season and the men's elite and women's first-division competitions, then filters by NTNUI's first-team IDs and Dragvollhallen's venue ID. Completed and past matches are excluded; today's unplayed matches remain available. Source times are interpreted in Europe/Oslo, including daylight saving changes.
+
+`src/server/volleylive.ts` reads the site's public `ta/Seasons`, `ta/Tournament/Season`, `ta/TournamentMatches`, `ta/MatchTeamMembers`, `ta/TeamMembers` and `ta/MatchReferee` endpoints at `https://sf48-terminlister-prod-app.azurewebsites.net/`. These are the endpoints used by the public website, rather than a separately contracted API. Successful responses are cached for five minutes. Reloading imports again and discards local edits; there is no background refresh that overwrites an open script.
+
+Published match rosters take priority. When unavailable, the registered team roster is shown with the label **Lagstall**. Captain and libero selections are imported only when explicitly identified in a match roster. Starting six always remain manual: neither a registered roster nor a played flag establishes the starting lineup. All imported fields remain editable. Source failures show a short message and leave manual entry available; missing fields stay blank.
 
 The `supabase/` directory contains historical SQL/configuration only. It is not used by the app, development server or tests. No migrations or hosted database changes are needed.
 
@@ -47,3 +51,10 @@ npm run format:check
 ```
 
 Tests cover announcement order, lineup selection, Oslo dates, editing, reload reset, dark mode, collapsible panels, accessibility and an empty workspace with no authentication or database backend.
+
+Import tests cover source filtering, roster fallback, partial failures and time conversion. Optional checks against the real service require network access and upcoming published fixtures:
+
+```sh
+SPEAKER_LIVE_CHECK=1 npm test -- tests/volleylive.test.ts
+SPEAKER_LIVE_CHECK=1 npm run test:e2e:local
+```
