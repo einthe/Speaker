@@ -1,13 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-async function login(page: Page, email = "user@demo.test") {
-  await page.goto("/login");
-  await page.getByLabel("E-post").fill(email);
-  await page.getByLabel("Passord").fill("DemoVolleyball123!");
-  await page.getByRole("button", { name: "Logg inn", exact: true }).click();
-  await page.waitForURL(email === "disabled@demo.test" ? /error=access/ : /\/matches$/);
-}
 async function openPanel(page: Page, name: "Lag" | "Kamper") {
   const toggle = page.getByRole("button", { name, exact: true });
   if ((await toggle.isVisible()) && (await toggle.getAttribute("aria-expanded")) === "false")
@@ -19,17 +12,8 @@ async function closePanel(page: Page, name: "Lag" | "Kamper") {
     await toggle.click();
 }
 
-test("requires login and blocks disabled accounts", async ({ page }) => {
-  await page.goto("/matches");
-  await expect(page).toHaveURL(/\/login/);
-  await login(page, "disabled@demo.test");
-  await expect(page.getByRole("main").getByRole("alert")).toHaveText(
-    "Kontoen din har ikke tilgang.",
-  );
-});
-
 test("reads the whole script and changes both lineups locally", async ({ page }, testInfo) => {
-  await login(page);
+  await page.goto("/matches");
   await expect(
     page.getByRole("heading", { name: "NTNUI – Fjordvik VBK", exact: true }),
   ).toBeVisible();
@@ -83,7 +67,7 @@ test("reads the whole script and changes both lineups locally", async ({ page },
 });
 
 test("adds a manual match and edits its players without saving", async ({ page }) => {
-  await login(page, "admin@demo.test");
+  await page.goto("/matches");
   await openPanel(page, "Kamper");
   await page.getByRole("button", { name: "Ny kamp", exact: true }).click();
   await page.getByLabel("Motstander", { exact: true }).fill("Tromsø");
@@ -101,15 +85,13 @@ test("adds a manual match and edits its players without saving", async ({ page }
   await away.getByRole("button", { name: "Fjern Ny Spiller" }).click();
   await expect(page.locator("#introductions")).not.toContainText("Ny Spiller");
   await closePanel(page, "Lag");
-  await page.getByRole("button", { name: "Logg ut", exact: true }).click();
-  await expect(page).toHaveURL(/\/login/);
 });
 
 test("dark script highlights edited values and panels collapse independently", async ({
   page,
   isMobile,
 }, testInfo) => {
-  await login(page);
+  await page.goto("/matches");
   await expect(page.locator("html")).toHaveCSS("color-scheme", "dark");
   await expect(page.locator("#welcome mark")).toHaveText(["Dragvollhallen", "Fjordvik VBK"]);
   await openPanel(page, "Lag");
@@ -149,4 +131,26 @@ test("dark script highlights edited values and panels collapse independently", a
     (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze()).violations,
   ).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath("dark-workspace.png"), fullPage: true });
+});
+
+test("opens without authentication or a backend and supports an empty workspace", async ({
+  page,
+}) => {
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
+  await page.goto("http://127.0.0.1:3101/login");
+  await expect(page).toHaveURL("http://127.0.0.1:3101/matches");
+  await expect(
+    page.getByRole("main").getByRole("heading", { name: "Manus", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Logg ut" })).toHaveCount(0);
+  await page.getByRole("main").getByRole("button", { name: "Ny kamp", exact: true }).click();
+  await page.getByLabel("Motstander", { exact: true }).fill("Tromsø");
+  await expect(page.locator("#welcome")).toContainText("Dagens motstander er Tromsø.");
+  await page.reload();
+  await expect(
+    page.getByRole("main").getByRole("heading", { name: "Manus", exact: true }),
+  ).toBeVisible();
+  expect(requests.every((url) => new URL(url).hostname === "127.0.0.1")).toBe(true);
+  expect(requests.some((url) => /supabase|\/auth\/v1|\/rest\/v1/.test(url))).toBe(false);
 });

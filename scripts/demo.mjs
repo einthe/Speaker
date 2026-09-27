@@ -1,9 +1,6 @@
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { startLocalBackend } from "../tests/fixtures/backend.mjs";
-import { seedDemo, demoPassword } from "./demo-seed.mjs";
 
 if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
   console.error("The demo is local only. Use npm run build and npm start for deployment.");
@@ -21,14 +18,8 @@ if (!["localhost", "127.0.0.1"].includes(values.hostname)) {
   throw new Error("The demo must bind to localhost or 127.0.0.1.");
 }
 const origin = `http://${values.hostname}:${port}`;
-console.log("Preparing local demo accounts…");
-const serviceKey = randomUUID();
-const backend = await startLocalBackend({ port: 0, serviceKey, seed: seedDemo });
 console.log(`
 NTNUI SPEAKER — LOCAL DEMO — ${origin}
-Admin: admin@demo.test
-User: user@demo.test
-Password: ${demoPassword}
 Match edits stay in the open tab and reset on reload.
 `);
 const child = spawn(
@@ -48,9 +39,6 @@ const child = spawn(
       ...process.env,
       NODE_ENV: "development",
       NEXT_BUILD_DIR: process.env.NEXT_BUILD_DIR ?? ".next-demo",
-      NEXT_PUBLIC_SUPABASE_URL: backend.url,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-demo-publishable-key",
-      NEXT_PUBLIC_SITE_URL: origin,
       SPEAKER_DEMO: "1",
     },
   },
@@ -67,8 +55,7 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
   });
 }
 child.on("error", (error) => console.error(error.message));
-child.on("close", async (code) => {
+child.on("close", (code) => {
   clearTimeout(killTimer);
-  await backend.close();
   process.exitCode = stopping ? 0 : (code ?? 1);
 });

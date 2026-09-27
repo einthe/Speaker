@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
-import { LogOut, Minus, Plus, X, CalendarDays, Users, PanelLeft, PanelRight } from "lucide-react";
-import { signOut } from "@/server/auth-actions";
+import { Minus, Plus, X, CalendarDays, Users, PanelLeft, PanelRight } from "lucide-react";
 import { dateLabel, localInput, toUTC } from "@/lib/dates";
 import {
   announcementTeams,
@@ -227,11 +226,6 @@ export function Workspace({ initialMatches, demo }: { initialMatches: Match[]; d
             <Users size={18} />
           </button>
         </div>
-        <form action={signOut}>
-          <button className="logout" title="Logg ut" aria-label="Logg ut">
-            <LogOut size={17} />
-          </button>
-        </form>
       </header>
 
       <div

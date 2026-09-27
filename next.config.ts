@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   distDir: process.env.NEXT_BUILD_DIR ?? ".next",
   poweredByHeader: false,
-  experimental: { serverActions: { bodySizeLimit: "1mb" } },
   async headers() {
     return [
       {

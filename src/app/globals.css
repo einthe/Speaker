@@ -127,10 +127,7 @@ p {
   margin-left: 6px;
   color: var(--muted);
 }
-.logout {
-  border: 0;
-  padding: 10px;
-}
+
 .workspace-columns {
   display: grid;
   grid-template-columns: var(--matches-width, 216px) minmax(0, 1fr) var(--teams-width, 354px);
@@ -411,35 +408,7 @@ summary {
   font-size: 22px;
   font-weight: 500;
 }
-.login {
-  max-width: 360px;
-  margin: 12vh auto;
-  padding: 24px;
-}
-.login .brand {
-  display: block;
-  text-decoration: none;
-  margin-bottom: 40px;
-}
-.login h1 {
-  font-size: 22px;
-  font-weight: 500;
-  margin-bottom: 26px;
-}
-.stack {
-  display: grid;
-  gap: 20px;
-}
-.login button {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #101014;
-}
-.warning {
-  font-size: 13px;
-  color: #ffb49e;
-  line-height: 1.5;
-}
+
 .container {
   padding: 48px;
 }
@@ -466,9 +435,7 @@ summary {
     padding-inline: 18px;
     gap: 12px;
   }
-  .workspace-header > form {
-    margin-left: 0;
-  }
+
   .mobile-controls {
     display: flex;
     gap: 5px;

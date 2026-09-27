@@ -1,16 +1,16 @@
-# Simplified speaker desk
+# Speaker desk
 
-The September 2026 simplification replaces the preparation/verification workflow with one authenticated workspace at /matches.
+The workspace at /matches is a standalone Next.js application. It no longer uses Supabase, authentication, account profiles, a local database emulator or database credentials. Old login links redirect to the workspace.
 
-- Left: matches ordered by scheduled time and a manual add button.
-- Center: the entire script, with normal scrolling and adjustable text size.
+- Left: matches ordered by scheduled time, with a manual add button.
+- Center: the full scrollable script, using the supplied PDF wording and cyan highlights for dynamic values.
 - Right: both rosters, starting six, captain, libero, coaches, match details, award and notes.
-- All changes update the script immediately in client memory.
-- NTNUI is announced last, including captains, coaches and starting lineups.
-- No match database access, source providers, synchronization, cron, readiness states or verification.
-- Supabase handles login and approved-user access only. All approved users can edit.
-- Old preparation/script/speaker URLs redirect to the workspace.
+- Both panels can be collapsed; the theme is neutral dark.
+- All changes update the script immediately in browser memory.
+- NTNUI is announced last. Each team's captain is followed by its coach; each libero appears last in its player list.
 
-Match edits survive switching within the workspace, but reset on reload or logout. Demo fixtures are fictional and enabled only with SPEAKER_DEMO=1 (automatically set by npm run dev). Otherwise the workspace starts empty for manual entry.
+Edits survive switching matches, but reset on reload. Anyone who can reach the site can open it. No shared persistence or live match feed is currently configured.
 
-The previously generated, unapplied match-domain migration was removed. Existing historical account migrations are retained; no hosted database was changed.
+`npm run dev` shows fictional fixtures. `npm run dev:manual` starts an empty workspace. Neither requires a backend. Supabase packages and the local Auth/SQL test adapter were removed. Historical migration files are retained for reference only; no hosted project was modified.
+
+External fixtures and rosters can be fetched server-side in a future integration without adding a database. The source and its supported data fields still need to be established.

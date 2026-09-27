@@ -6,4 +6,3 @@ playwright*.ts
 playwright-report/
 test-results/
 .next-*/
-scripts/test-backend.mjs

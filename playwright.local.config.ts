@@ -12,23 +12,18 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "node scripts/test-backend.mjs",
-      url: "http://127.0.0.1:54329/health",
-      reuseExistingServer: false,
-      timeout: 60000,
-    },
-    {
-      command: "npm run dev:connected -- --hostname 127.0.0.1 --port 3100",
-      url: "http://127.0.0.1:3100/login",
+      command: "npm run dev:manual -- --hostname 127.0.0.1 --port 3100",
+      url: "http://127.0.0.1:3100/matches",
       reuseExistingServer: false,
       timeout: 120000,
-      env: {
-        NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54329",
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test-publishable-key",
-        NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100",
-        SPEAKER_DEMO: "1",
-        NEXT_BUILD_DIR: ".next-local-tests",
-      },
+      env: { SPEAKER_DEMO: "1", NEXT_BUILD_DIR: ".next-local-tests" },
+    },
+    {
+      command: "npm run dev:manual -- --hostname 127.0.0.1 --port 3101",
+      url: "http://127.0.0.1:3101/matches",
+      reuseExistingServer: false,
+      timeout: 120000,
+      env: { SPEAKER_DEMO: "0", NEXT_BUILD_DIR: ".next-manual-tests" },
     },
   ],
 });
