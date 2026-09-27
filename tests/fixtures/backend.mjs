@@ -1,8 +1,7 @@
-// Loopback-only test adapter. Real production SQL/RLS runs in PGlite; Auth and
-// Storage HTTP are simulated. This is not a replacement for hosted Supabase E2E.
+// Loopback-only test adapter. Real production SQL/RLS runs in PGlite; Auth HTTP are simulated. This is not a replacement for hosted Supabase E2E.
 import { PGlite } from "@electric-sql/pglite";
 import { createServer } from "node:http";
-import { createHash, createHmac, randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
@@ -32,7 +31,6 @@ export async function startLocalBackend({
     columns.get(row.table_name).add(row.column_name);
   }
   // Infer embedding direction/cardinality from the actual migration's constraints.
-  // post_media is to-many; older fixtures used UNIQUE(post_id).
   const relations = (
     await db.query(`select c.conname, c.conrelid::regclass::text as source,
  c.confrelid::regclass::text as target, a.attname as source_key, b.attname as target_key,
@@ -43,7 +41,6 @@ export async function startLocalBackend({
   ).rows;
   const users = new Map(),
     sessions = new Map(),
-    files = new Map(),
     failures = new Map();
   const identifier = (value) => {
     if (!/^[a-z_]+$/.test(value)) throw new Error("Invalid identifier");
@@ -262,20 +259,14 @@ export async function startLocalBackend({
               return send(res, 204);
             }
             if (path === "/auth/v1/recover") return send(res, 200, {});
-            if (!privileged) {
+            if (privileged) {
+              await db.exec("set role service_role");
+            } else {
               await db.exec(`set role ${actor ? "authenticated" : "anon"}`);
               await db.query("select set_config('request.jwt.claim.sub',$1,false)", [actor ?? ""]);
             }
             if (path.startsWith("/rest/v1/rpc/")) {
               const name = identifier(path.split("/").at(-1));
-              if (name === '"admin_users"')
-                return send(
-                  res,
-                  200,
-                  (
-                    await db.query(`select to_jsonb(t) as row from public.admin_users() t`)
-                  ).rows.map((r) => r.row),
-                );
               const isData = Object.hasOwn(body, "data");
               if (Object.keys(body).length === 0)
                 return send(
@@ -298,10 +289,7 @@ export async function startLocalBackend({
             if (path.startsWith("/rest/v1/")) {
               const table = path.split("/").at(-1);
               if (!columns.has(table)) return send(res, 404, {});
-              const operation =
-                table === "profiles" && url.searchParams.get("select")?.includes("player_profiles(")
-                  ? "roster"
-                  : table;
+              const operation = table;
               if (failures.get(operation) > 0) {
                 failures.set(operation, failures.get(operation) - 1);
                 // Non-retryable query error: exercise the UI boundary, not SDK backoff.
@@ -356,80 +344,6 @@ export async function startLocalBackend({
                   : send(res, 406, { code: "PGRST116", message: "Expected one row" });
               return send(res, 200, output, headers);
             }
-            if (path.startsWith("/storage/v1/object")) {
-              if (!actor) return send(res, 403, {});
-              const prefix = "/storage/v1/object/",
-                infoPrefix = "/storage/v1/object/info/",
-                authenticatedPrefix = "/storage/v1/object/authenticated/";
-              const resource = decodeURIComponent(
-                path.slice(
-                  path.startsWith(infoPrefix)
-                    ? infoPrefix.length
-                    : path.startsWith(authenticatedPrefix)
-                      ? authenticatedPrefix.length
-                      : prefix.length,
-                ),
-              );
-              const [bucket, ...parts] = resource.split("/");
-              const name = parts.join("/");
-              if (req.method === "POST") {
-                if (failures.get("upload") > 0) {
-                  failures.set("upload", failures.get("upload") - 1);
-                  return send(res, 503, { error: "Storage unavailable" });
-                }
-                let data = bytes;
-                if ((req.headers["content-type"] ?? "").includes("multipart/form-data")) {
-                  const form = await new Request(url, {
-                    method: "POST",
-                    headers: req.headers,
-                    body: bytes,
-                  }).formData();
-                  for (const value of form.values())
-                    if (value instanceof File) data = Buffer.from(await value.arrayBuffer());
-                }
-                const result = await db.query(
-                  "insert into storage.objects(bucket_id,name,owner_id) values($1,$2,$3) returning id",
-                  [bucket, name, actor],
-                );
-                files.set(`${bucket}/${name}`, data);
-                return send(res, 200, { Id: result.rows[0].id, Key: `${bucket}/${name}` });
-              }
-              if (req.method === "GET") {
-                const rows = (
-                  await db.query("select id from storage.objects where bucket_id=$1 and name=$2", [
-                    bucket,
-                    name,
-                  ])
-                ).rows;
-                if (!rows.length || !files.has(`${bucket}/${name}`)) return send(res, 404, {});
-                if (path.startsWith(infoPrefix)) {
-                  const file = files.get(`${bucket}/${name}`);
-                  return send(res, 200, {
-                    id: rows[0].id,
-                    version: createHash("sha256").update(file).digest("hex"),
-                    name,
-                    bucket_id: bucket,
-                    size: file.length,
-                  });
-                }
-                if (failures.get("download") > 0) {
-                  failures.set("download", failures.get("download") - 1);
-                  return send(res, 503, { error: "Storage download unavailable" });
-                }
-                res.writeHead(200, { "Content-Type": "image/webp" });
-                return res.end(files.get(`${bucket}/${name}`));
-              }
-              if (req.method === "DELETE") {
-                for (const name of body.prefixes ?? []) {
-                  await db.query("delete from storage.objects where bucket_id=$1 and name=$2", [
-                    bucket,
-                    name,
-                  ]);
-                  files.delete(`${bucket}/${name}`);
-                }
-                return send(res, 200, []);
-              }
-            }
             send(res, 404, { message: "Test adapter endpoint not implemented" });
           } catch (error) {
             send(res, 400, { code: error.code ?? "TEST_ERROR", message: error.message });
@@ -443,7 +357,7 @@ export async function startLocalBackend({
     });
   });
   try {
-    if (seed) await seed({ db, addUser, files });
+    if (seed) await seed({ db, addUser });
     await new Promise((resolve, reject) => {
       server.once("error", reject);
       server.listen(port, "127.0.0.1", resolve);

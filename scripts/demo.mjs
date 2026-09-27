@@ -21,20 +21,15 @@ if (!["localhost", "127.0.0.1"].includes(values.hostname)) {
   throw new Error("The demo must bind to localhost or 127.0.0.1.");
 }
 const origin = `http://${values.hostname}:${port}`;
-console.log("Preparing fictional demo data in an isolated, temporary local database…");
+console.log("Preparing local demo accounts…");
 const serviceKey = randomUUID();
 const backend = await startLocalBackend({ port: 0, serviceKey, seed: seedDemo });
 console.log(`
-LOCAL DEMO — ${origin}
-  Admin:   admin@demo.test
-  Coach:   coach@demo.test
-  Player:  player@demo.test
-  Pending: pending@demo.test
-  Disabled: disabled@demo.test
-  Password for all fictional accounts: ${demoPassword}
-
-Changes and uploads last until you stop this command. Restart to reset.
-No Supabase project is contacted. Email delivery is simulated.
+NTNUI SPEAKER — LOCAL DEMO — ${origin}
+Admin: admin@demo.test
+User: user@demo.test
+Password: ${demoPassword}
+Match edits stay in the open tab and reset on reload.
 `);
 const child = spawn(
   process.execPath,
@@ -52,15 +47,11 @@ const child = spawn(
     env: {
       ...process.env,
       NODE_ENV: "development",
-      NOTIFICATION_EMAIL_MODE: "preview",
-      RESEND_API_KEY: "",
-      RESEND_FROM_EMAIL: "NTNUI D2A <demo@example.test>",
       NEXT_BUILD_DIR: process.env.NEXT_BUILD_DIR ?? ".next-demo",
       NEXT_PUBLIC_SUPABASE_URL: backend.url,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-demo-publishable-key",
       NEXT_PUBLIC_SITE_URL: origin,
-      SUPABASE_SECRET_KEY: serviceKey,
-      VOLLEYBALL_MATCH_SYNC_ENABLED: process.env.VOLLEYBALL_MATCH_SYNC_ENABLED ?? "0",
+      SPEAKER_DEMO: "1",
     },
   },
 );

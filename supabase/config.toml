@@ -1,4 +1,4 @@
-project_id = "ntnui-volleyball-d2a"
+project_id = "ntnui-speaker"
 
 [api]
 enabled = true
@@ -22,8 +22,8 @@ additional_redirect_urls = ["http://localhost:3000/auth/callback"]
 minimum_password_length = 12
 
 [auth.email]
-enable_signup = true
-enable_confirmations = false
+enable_signup = false
+enable_confirmations = true
 
 [storage]
 enabled = true
